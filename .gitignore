@@ -121,6 +121,8 @@ Thumbs.db
 # -------------------------
 *.ipynb
 *.csv
+*.ipynb_checkpoints
+*-checkpoint.ipynb
 
 # track these files, if they exist
 !.gitignore
