@@ -51,6 +51,11 @@ LFs are organized into several files in the LFs subdirectory.
 ## Instructions for Manual Annotation
 Note: At this time, I suspect prevalance of positive labels in the dataset could be as low as 5%, but we will get a better sense of this as we proceed with labeling.
 
+The following articles provide the background for the labeling criteria summarized below. 
+ * S. C. Klein and M. E. Peterson, “Canine hypoadrenocorticism: Part I,” Can Vet J, vol. 51, no. 1, pp. 63–69, Jan. 2010. (
+"Clinical signs and physical examination findings" and "Laboratory abnormalities")
+ * K. Van Lanen and A. Sande, “Canine hypoadrenocorticism: pathogenesis, diagnosis, and treatment,” Top Companion Anim Med, vol. 29, no. 4, pp. 88–95, Dec. 2014, doi: 10.1053/j.tcam.2014.10.001. ("Clinical findings" and "Laboratory findings")
+
 The easiest way to confirm a positive label is the presence of post-hoc evidence of clinical suspicion of Addison's Disease. This would be one of:
 * Patient has a diagnosis or problem of "hypoadrenocorticism" or "Addison's Disease" mentioned in the note. A positive label should be assigned even if the note indicates suspicion without a definitive diagnosis.
 * Patient was given a "baseline cortisol" or "ACTH stimulation" ("ACTH stim") test, regardless of its outcome.
@@ -59,7 +64,7 @@ The easiest way to confirm a positive label is the presence of post-hoc evidence
   * Fludrocortisone acetate (florinef)
   
 In other cases, a clinician should be suspecting the disease if the following conditions are met:
-* Patient has **signs of GI or nonspecific disease**, indicated by any of the following:
+* Patient has **signs of GI or nonspecific disease, or hypovolemic shock**, indicated by any of the following:
   * Inappetance
   * Anorexia
   * Vomiting or regurgitation
@@ -71,6 +76,8 @@ In other cases, a clinician should be suspecting the disease if the following co
   * Depression
   * Weakness
   * Shaking
+  * Hair loss
+  * Hypovolemic shock: bradycardia or tachycardia, collapse, hypothermia, weak pulses, or poor capillary refill time
 * The patient has **not** been diagnosed with one of these diseases:
   * Kidney failure (acute kidney injury, AKI, acute kidney disease, AKD)
   * GI parasites (worms)
@@ -81,14 +88,12 @@ In other cases, a clinician should be suspecting the disease if the following co
   * Low sodium (Na), i.e. hyponatremia
   * High potassium (K), i.e. hyperkalemia
   * Low chloride (Cl), i.e. hypochloremia
-  * Sodium to potassium ratio (Na:K) is less than 27:1
-  * Mild acidosis indicated by low bicarbonate (HCO3) or low pH
   * Azotemia: increased BUN and/or creatinine
+  * Mild to moderate normocytic, normochromic, nonregenerative anemia (PCV 20-35%)
+  * High calcium, i.e. hypercalcemia
+  * Absence of a stress leukogram in a sick animal (normal CBC is considered abnormal here)
+  * High lymphocytes, i.e. lymphocytosis
+  * Mild acidosis indicated by low bicarbonate (HCO3) or low pH
   * Low blood glucose, i.e. hypoglycemia
   * Low albumin, i.e. hypoalbuminemia
   * Low cholesterol, i.e. hypocholesterolemia
-  * High calcium, i.e. hypercalcemia
-  * Mild to moderate normocytic, normochromic, nonregenerative anemia (PCV 20-35%)
-  * Absence of a stress leukogram
-  * High eosinophils, i.e. eosinophilia
-  * High lymphocytes, i.e. lymphocytosis
