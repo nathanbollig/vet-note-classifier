@@ -32,12 +32,13 @@ STEP 1: With respect to working directory, raw data is located at '../data/data_
 STEP 2: Run code from the second half of the explore.ipynb Jupyter notebook, which creates '../data/data_processed/data_processed.csv'. The processed data output is the input for labeling.
 
 ### Labeling
-STEP 3: Currently the testing code for labeling functions resides alongside the labeling functions. At the appropriate time, we will create a separate file to combine them into a labeling model.
+STEP 3: `labeler.py` script loads processed data, applies the labeling functions, creates a label model, and outputs labels to '../data/labels/label_model_output.csv'.
 
 ## Labeling Functions
 Each labeling function (LF) takes a Pandas Series object (row of a dataframe) and outputs either 1 (suspected Addison's), 0 (not suspected Addison's), or -1 (abstain).
 
-LFs are organized into several files
+LFs are organized into several files in the LFs subdirectory.
 * `LF_lab_tests.py` contains labeling functions that label based on laboratory test information
+* `LF_post_hoc.py` contains labeling functions evaluating for the presence of post-hoc evidence of clinical suspicion (diagnostic tests performed, treatments given, etc.)
 
 ## Instructions for Manual Annotation
