@@ -32,7 +32,14 @@ STEP 1: With respect to working directory, raw data is located at '../data/data_
 STEP 2: Run code from the second half of the explore.ipynb Jupyter notebook, which creates '../data/data_processed/data_processed.csv'. The processed data output is the input for labeling.
 
 ### Labeling
-STEP 3: `labeler.py` script loads processed data, applies the labeling functions, creates a label model, and outputs labels to '../data/labels/label_model_output.csv'.
+STEP 3: `labeler.py` script loads processed data, applies the labeling functions, creates a label model.
+
+STEP 4: (TODO) Output label model, predicted labels, or predicted probabilities to '../data/label_model_output/'.
+
+### Train Classifier
+STEP 5: (TODO) Pull in output from label model and manual labels.
+
+STEP 6: (TODO) Train and evaluate classifier on the test set.
 
 ## Labeling Functions
 Each labeling function (LF) takes a Pandas Series object (row of a dataframe) and outputs either 1 (suspected Addison's), 0 (not suspected Addison's), or -1 (abstain).
@@ -42,3 +49,46 @@ LFs are organized into several files in the LFs subdirectory.
 * `LF_post_hoc.py` contains labeling functions evaluating for the presence of post-hoc evidence of clinical suspicion (diagnostic tests performed, treatments given, etc.)
 
 ## Instructions for Manual Annotation
+Note: At this time, I suspect prevalance of positive labels in the dataset could be as low as 5%, but we will get a better sense of this as we proceed with labeling.
+
+The easiest way to confirm a positive label is the presence of post-hoc evidence of clinical suspicion of Addison's Disease. This would be one of:
+* Patient has a diagnosis or problem of "hypoadrenocorticism" or "Addison's Disease" mentioned in the note. A positive label should be assigned even if the note indicates suspicion without a definitive diagnosis.
+* Patient was given a "baseline cortisol" or "ACTH stimulation" ("ACTH stim") test, regardless of its outcome.
+* If the patient has been, is, or will be prescribed one of the following drugs, they likely have a diagnosis of Addison's Disease:
+  * Desoxycorticosterone pivalate (DOCP)
+  * Fludrocortisone acetate (florinef)
+  
+In other cases, a clinician should be suspecting the disease if the following conditions are met:
+* Patient has **signs of GI or nonspecific disease**, indicated by any of the following:
+  * Inappetance
+  * Anorexia
+  * Vomiting or regurgitation
+  * Diarrhea
+  * Melana and hematochezia
+  * Abdominal pain
+  * Weight loss
+  * Lethargy
+  * Depression
+  * Weakness
+  * Shaking
+* The patient has **not** been diagnosed with one of these diseases:
+  * Kidney failure (acute kidney injury, AKI, acute kidney disease, AKD)
+  * GI parasites (worms)
+  * Liver disease
+  * Acute pancreatitis
+* The patient does **not** have a history of toxin ingested noted.
+* In most but not all cases, the patient will have some abnormal results on a screening chemistry panel or CBC. If the other conditions are met but none of the following are present (or the patient has an opposing or contradictory result to these), this warrants further review. These are loosely in order from more common to less common findings.
+  * Low sodium (Na), i.e. hyponatremia
+  * High potassium (K), i.e. hyperkalemia
+  * Low chloride (Cl), i.e. hypochloremia
+  * Sodium to potassium ratio (Na:K) is less than 27:1
+  * Mild acidosis indicated by low bicarbonate (HCO3) or low pH
+  * Azotemia: increased BUN and/or creatinine
+  * Low blood glucose, i.e. hypoglycemia
+  * Low albumin, i.e. hypoalbuminemia
+  * Low cholesterol, i.e. hypocholesterolemia
+  * High calcium, i.e. hypercalcemia
+  * Mild to moderate normocytic, normochromic, nonregenerative anemia (PCV 20-35%)
+  * Absence of a stress leukogram
+  * High eosinophils, i.e. eosinophilia
+  * High lymphocytes, i.e. lymphocytosis
