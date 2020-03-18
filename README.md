@@ -31,10 +31,10 @@ STEP 1: With respect to working directory, raw data is located at '../data/data_
 
 STEP 2: Run code from the second half of the explore.ipynb Jupyter notebook, which creates '../data/data_processed/data_processed.csv'. The processed data output is the input for labeling.
 
-### Labeling
+### Label Model
 STEP 3: `labeler.py` script loads processed data, applies the labeling functions, creates a label model.
 
-STEP 4: (TODO) Output label model, predicted labels, or predicted probabilities to '../data/label_model_output/'.
+STEP 4: Output filtered training data (where at least one LF did not abstain) and corresponding label model output probabilities to '../data/label_model_output/'. Plan to load df_train_filtered.csv as Pandas dataframe and probs_train_filtered.npy as numpy array.
 
 ### Train Classifier
 STEP 5: (TODO) Pull in output from label model and manual labels.
