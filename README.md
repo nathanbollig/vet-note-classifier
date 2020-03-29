@@ -34,7 +34,13 @@ STEP 2: Run code from the second half of the explore.ipynb Jupyter notebook, whi
 ### Label Model
 STEP 3: `labeler.py` script loads processed data, applies the labeling functions, creates a label model.
 
-STEP 4: Output filtered training data (where at least one LF did not abstain) and corresponding label model output probabilities to '../data/label_model_output/'. Plan to load df_train_filtered.csv as Pandas dataframe and probs_train_filtered.npy as numpy array.
+STEP 4: Output the following data to '../data/label_model_output/'.
+* `df_train_filtered.csv` - filtered training data (where at least one LF did not abstain)
+* `probs_train_filtered.npy` - corresponding label model output probabilities (probability of a 1)
+* `df_test.csv` - test data, based on human-provided labels in '../data/human_labels/'
+* `lab_test.npy` - binary test labels provided by a human
+* `LF_analysis_train.csv` - analysis of labeling functions on the training data
+* `LF_analysis_test.csv` - analysis of labeling functions on the test data
 
 ### Train Classifier
 STEP 5: (TODO) Pull in output from label model and manual labels.
@@ -81,7 +87,7 @@ In other cases, a clinician should be suspecting the disease if the following co
 * The patient has **not** been diagnosed with one of these diseases:
   * Kidney failure (acute kidney injury, AKI, acute kidney disease, AKD)
   * GI parasites (worms)
-  * Liver disease
+  * Primary liver disease (not just evidence of liver damage on chemistry panel)
   * Acute pancreatitis
 * The patient does **not** have a history of toxin ingested noted.
 * In most but not all cases, the patient will have some abnormal results on a screening chemistry panel or CBC. If the other conditions are met but none of the following are present (or the patient has an opposing or contradictory result to these), this warrants further review. These are loosely in order from more common to less common findings.
