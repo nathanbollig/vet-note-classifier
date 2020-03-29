@@ -53,6 +53,7 @@ Each labeling function (LF) takes a Pandas Series object (row of a dataframe) an
 LFs are organized into several files in the LFs subdirectory.
 * `LF_lab_tests.py` contains labeling functions that label based on laboratory test information
 * `LF_post_hoc.py` contains labeling functions evaluating for the presence of post-hoc evidence of clinical suspicion (diagnostic tests performed, treatments given, etc.)
+* `LF_rule_outs.py` contains labeling functions for ruling out Addison's Disease
 
 ## Instructions for Manual Classification
 Note: At this time, I suspect prevalance of positive labels in the dataset could be as low as 5%, but we will get a better sense of this as we proceed with labeling.
