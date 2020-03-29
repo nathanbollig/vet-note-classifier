@@ -23,7 +23,7 @@ Applying weak supervision to train a classifier of veterinary clinical notes
   * 830 - Small Animal Internal Medicine
 * `comment_text`: html-formatted report text (html is reportedly non-standard)
 
-## Pipeline (as of 3/18)
+## Pipeline
 Note: The function load() in functions.py was previously used and may be useful at some point for encoding string features prior to model training.
 
 ### Data Processing
