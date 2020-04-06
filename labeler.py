@@ -7,9 +7,11 @@ Created on Wed Mar 18 09:30:34 2020
 @author: NBOLLIG
 """
 
+from LFs.LF_GI import *
 from LFs.LF_lab_tests import *
 from LFs.LF_post_hoc import *
 from LFs.LF_rule_outs import *
+from LFs.LF_utils import make_lfs_list
 
 from snorkel.labeling import PandasLFApplier
 from snorkel.labeling import LFAnalysis
@@ -21,18 +23,54 @@ import pandas as pd
 import numpy as np
 import os
 
+from sklearn.metrics import f1_score
+
 # =============================================================================
 # TODO: Add new LFs to list!!!
 # =============================================================================
+"""
+The label functions are imported as callables that return 1, 0, or -1, and sorted
+into the appropriate categories below.
+"""
 
-lfs = [
-    hyponatremia_keywords,
-    hyperkalemia_keywords,
+post_hoc_callables = [
     dx_keywords,
     test_keywords,
     tx_keywords,
-    healthy_keywords,
 ]
+
+GI_callables = [
+    GI_keywords_1,
+    GI_keywords_2,
+    GI_keywords_3,
+    GI_keywords_4,
+    GI_keywords_5,
+    GI_keywords_6,
+    GI_keywords_7,
+    GI_keywords_8,
+    GI_keywords_9,
+]
+
+rule_out_callables = [
+    healthy_keywords,
+    kidney_keywords,
+    parasite_keywords,
+    liver_keywords,
+    panc_keywords,
+    toxin_keywords,
+    effusion_keywords,
+    primary_GI_keywords,
+]
+
+lab_callables = [
+    hyponatremia_keywords,
+    hyperkalemia_keywords,
+]
+
+lfs = make_lfs_list(post_hoc_callables, 
+                  GI_callables, 
+                  rule_out_callables, 
+                  lab_callables)
 
 # =============================================================================
 
@@ -50,7 +88,33 @@ def read_human_labels(label_dir):
            df = df[['record_number', 'human_label']]
            dataframes.append(df)
 
-    return pd.concat(dataframes)   
+    return pd.concat(dataframes).drop_duplicates(subset = 'record_number')
+
+
+"""
+Pulls together df_test, label matrix, pred probability, and human labels 
+into error analysis spreadsheet.
+"""
+def error_analysis(df_test, L_test, lfs, preds, lab_test, output_dir):
+    df = df_test.copy()
+    assert(df.shape[0] == L_test.shape[0])
+    assert(len(lfs) == L_test.shape[1])
+    assert(df.shape[0] == len(lab_test))
+    
+    # Add LF results
+    for i in range(L_test.shape[1]):
+        colname = lfs[i].name
+        df[colname] = pd.Series(L_test[:, i], index=df.index)
+
+    # Add prediction
+    df['pred'] = pd.Series(preds, index=df.index)
+
+    # Add human label
+    df['human_label'] = pd.Series(lab_test, index=df.index)
+    
+    # Save
+    path = os.path.join(output_dir, 'error_analysis.csv')
+    df.to_csv(path, index = False)
 
 """
 loads processed data, applies the labeling functions, creates a label model
@@ -70,6 +134,7 @@ Parameters:
         lab_test.npy
         LF_analysis_train.csv
         LF_analysis_test.csv
+        error_analysis.csv
         
     label_dir - directory containing .csv files of human labels    
 
@@ -111,10 +176,17 @@ def main(train_path, output_dir, label_dir):
     label_model.fit(L_train=L_train, n_epochs=500, log_freq=100, seed=123)
     
     # Evaluate the label model using labeled test set
-    metric = 'f1'
-    label_model_acc = label_model.score(L=L_test, Y=lab_test, metrics=[metric], tie_break_policy="random")[metric]
+    for metric in ['recall', 'precision', 'f1', 'accuracy']:
+        label_model_acc = label_model.score(L=L_test, Y=lab_test, metrics=[metric], tie_break_policy="random")[metric]
+        print("%-15s %.2f%%" % (metric+":", label_model_acc * 100))
     
-    print("Label model %s score is %.2f%% ..." % (metric, label_model_acc * 100))
+    null_f1 = f1_score(lab_test.values, np.ones((df_test.shape[0],)))
+    print("%-15s %.2f%%" % ("null f1:", null_f1 * 100))
+    print("%-15s %.2f%%" % ("null accuracy:", np.maximum(1-np.mean(lab_test), np.mean(lab_test)) * 100))
+    
+    # Save error analysis
+    preds = label_model.predict_proba(L_test)
+    error_analysis(df_test, L_test, lfs, preds[:,1], lab_test, output_dir)
     
     # Get labels on train
     probs_train = label_model.predict_proba(L_train)
