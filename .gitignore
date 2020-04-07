@@ -116,6 +116,10 @@ Thumbs.db
 *.key
 *.pem
 
+# ignore compiled files
+*.pyc
+
+
 # -------------------------
 # BEGIN Whitelisted Files
 # -------------------------
@@ -123,6 +127,7 @@ Thumbs.db
 *.csv
 *.ipynb_checkpoints
 *-checkpoint.ipynb
+*.db
 
 # track these files, if they exist
 !.gitignore
