@@ -180,7 +180,7 @@ def main(train_path, output_dir, label_dir):
         label_model_acc = label_model.score(L=L_test, Y=lab_test, metrics=[metric], tie_break_policy="random")[metric]
         print("%-15s %.2f%%" % (metric+":", label_model_acc * 100))
     
-    null_f1 = f1_score(lab_test.values, np.ones((df_test.shape[0],)), average = 'micro')
+    null_f1 = f1_score(lab_test.values, np.ones((df_test.shape[0],)))
     print("%-15s %.2f%%" % ("null f1:", null_f1 * 100))
     print("%-15s %.2f%%" % ("null accuracy:", np.maximum(1-np.mean(lab_test), np.mean(lab_test)) * 100))
     
@@ -195,7 +195,7 @@ def main(train_path, output_dir, label_dir):
     df_train_filtered, probs_train_filtered = filter_unlabeled_dataframe(X=df_train, y=probs_train, L=L_train)
     
     # Save filtered training set
-    df_train_filtered['prob'] = probs_train_filtered[:,1]#Added Chit
+    df_train_filtered['prob'] = probs_train_filtered[:,1]
     path = os.path.join(output_dir, 'df_train_filtered.csv')
     df_train_filtered.to_csv(path, index = False)
     
@@ -204,6 +204,8 @@ def main(train_path, output_dir, label_dir):
     np.save(path, probs_train_filtered[:,1])
     
     # Save training data set and labels
+    assert len(df_test) == len(lab_test)
+    df_test['human_label'] = lab_test
     path = os.path.join(output_dir, 'df_test.csv')
     df_test.to_csv(path, index = False)
     path = os.path.join(output_dir, 'lab_test')
