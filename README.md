@@ -37,15 +37,15 @@ STEP 3: `labeler.py` script loads processed data, applies the labeling functions
 STEP 4: Output the following data to '../data/label_model_output/'.
 * `df_train_filtered.csv` - filtered training data (where at least one LF did not abstain)
 * `probs_train_filtered.npy` - corresponding label model output probabilities (probability of a 1)
-* `df_test.csv` - test data, based on human-provided labels in '../data/human_labels/'
-* `lab_test.npy` - binary test labels provided by a human
+* `df_test.csv` - test data, based on human-provided labels in '../data/human_labels/' (human_label column also included)
+* `lab_test.npy` - binary test labels provided by a human (redundant)
 * `LF_analysis_train.csv` - analysis of labeling functions on the training data
 * `LF_analysis_test.csv` - analysis of labeling functions on the test data
 
 ### Train Classifier
-STEP 5: (TODO) Pull in output from label model and manual labels.
+STEP 5: Pull in output from label model and manual labels.
 
-STEP 6: (TODO) Train and evaluate classifier on the test set.
+STEP 6: Train and evaluate classifier on the test set. Save results to '../data/classifier_output/'.
 
 ## Labeling Functions
 Each labeling function (LF) takes a Pandas Series object (row of a dataframe) and outputs either 1 (suspected Addison's), 0 (not suspected Addison's), or -1 (abstain).
