@@ -51,6 +51,7 @@ STEP 6: Train and evaluate classifier on the test set. Save results to '../data/
 Each labeling function (LF) takes a Pandas Series object (row of a dataframe) and outputs either 1 (suspected Addison's), 0 (not suspected Addison's), or -1 (abstain).
 
 LFs are organized into several files in the LFs subdirectory.
+* `LF_GI.py` contains labeling functions that look for clinical signs
 * `LF_lab_tests.py` contains labeling functions that label based on laboratory test information
 * `LF_post_hoc.py` contains labeling functions evaluating for the presence of post-hoc evidence of clinical suspicion (diagnostic tests performed, treatments given, etc.)
 * `LF_rule_outs.py` contains labeling functions for ruling out Addison's Disease
