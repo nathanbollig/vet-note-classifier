@@ -14,10 +14,10 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
 
 from sklearn.model_selection import StratifiedKFold, GridSearchCV
-from sklearn.model_selection import train_test_split
+# from sklearn.model_selection import train_test_split
 
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
+from sklearn.feature_extraction import text
 
 from sklearn.metrics import f1_score, make_scorer, precision_score, recall_score, accuracy_score
 from sklearn.metrics import average_precision_score
@@ -31,13 +31,14 @@ import sklearn
 from sklearn.utils import resample
 
 from labeler import read_human_labels
+
 random_state = 100
 scorer = make_scorer(f1_score)
 # preprocess_params = {}
 
 models = {'RandomForestClassifier': RandomForestClassifier(),
           'LogisticRegression': LogisticRegression(),
-          #'GradientBoostingClassifier': GradientBoostingClassifier(),
+          # 'GradientBoostingClassifier': GradientBoostingClassifier(),
           # 'SVC' : SVC()
           }
 
@@ -235,13 +236,18 @@ def run_classifier(X_train, y_train, X_test, y_test, feature_names, output_dir):
         disp.ax_.get_legend().remove()  # NB: remove legend and add space to plot title
         disp.figure_.savefig(os.path.join(output_dir, model_name + '_PR.png'), dpi=300)
 
+
 def get_features(x):
+    custom_stopwords = list(text.ENGLISH_STOP_WORDS)
+    custom_stopwords.remove('not')
+
     tfidf = TfidfVectorizer(list(x), strip_accents='unicode', decode_error='strict',
-                            stop_words='english', min_df=2, max_df=0.8,
+                            stop_words=custom_stopwords, min_df=2, max_df=0.7,
                             ngram_range=(1, 2))
     x_features = tfidf.fit_transform(x)
     feature_names = np.array(tfidf.get_feature_names())  # NB
     return feature_names, x_features
+
 
 def main(output_dir, experiment='all'):
     assert experiment in [1, 2, 'all'], print('experiment should be either 1, 2 or "all"')

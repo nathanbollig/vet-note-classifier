@@ -1,3 +1,17 @@
+# -*- coding: utf-8 -*-
+"""
+Creates new columns after data cleaning from the HTML text.
+New columns:
+1. Cleaned_Text
+2. History
+3. Physical_Exam
+4. Diagnoses
+5. Diagnostic_Test
+6. Treatment
+
+@author: CHIT
+"""
+
 import numpy as np
 import pandas as pd
 import re
@@ -81,12 +95,34 @@ def find_features_row(cleaned_text, titles, keywords):
     indexes = np.unique(result_text, return_index=True)[1]
     result_text = [result_text[index] for index in sorted(indexes)]
 
-    return " ".join(result_text)  # NB 3/17 - space to prevent words from being concatenated
+    result_text = " ".join(result_text)  # NB 3/17 - space to prevent words from being concatenated
+    return data_cleaning(result_text)
+
+
+def data_cleaning(text):
+    # remove newline characters
+    cleaned_text = re.sub('\\n', ' ', text)
+    # remove optionals am/pm like text [WARNING: it will remove na(sodium), k (potassium)...etc]
+    # cleaned_text = re.sub('[a-z]{1,}\/[a-z]{1,}', ' ', cleaned_text)
+
+    # remove numbers and dates
+    cleaned_text = re.sub('\[date\]|\[num\]', ' ', cleaned_text)
+    # remove emails
+    cleaned_text = re.sub('[a-z1-9]{1,}@[a-z]{1,}\.(com|edu|uk|co)', ' ', cleaned_text)
+    # remove non a-z characters
+    cleaned_text = re.sub('[^a-z\s]', ' ', cleaned_text)
+    # removing all 1 or 2 char words
+    cleaned_text = re.sub('\s[a-z]{1,2}\s', ' ', cleaned_text)
+    cleaned_text = re.sub('\s[a-z]{1,2}\s', ' ', cleaned_text)
+    # removing extract space between the words
+    cleaned_text = re.sub('\s+', ' ', cleaned_text)
+
+    return cleaned_text
 
 
 def process_row(comment_html_o):
     if comment_html_o is np.nan:
-        return ('', '', '', '', '', '')
+        return '', '', '', '', '', ''
 
     # if verbose: print(comment_html)
     comment_html = comment_html_o.lower()
@@ -129,22 +165,6 @@ def process_row(comment_html_o):
     # remove remaining numbers
     cleaned_text = re.sub('\s[0-9\.].*?(\s|\n)', ' [NUM] ', cleaned_text)
 
-    # remove newline characters
-    cleaned_text = re.sub('\\n', ' ', cleaned_text)
-    # remove optionals am/pm like text
-    cleaned_text = re.sub('[a-z]{1,}\/[a-z]{1,}', ' ', cleaned_text)
-    # remove numbers and dates
-    cleaned_text = re.sub('\[date\]|\[num\]', ' ', cleaned_text)
-    # remove emails
-    cleaned_text = re.sub('[a-z1-9]{1,}@[a-z]{1,}\.(com|edu|uk|co)', ' ', cleaned_text)
-    # remove non a-z characters
-    cleaned_text = re.sub('[^a-z\s]', ' ', cleaned_text)
-    # removing all 1 or 2 char words
-    cleaned_text = re.sub('\s[a-z]{1,2}\s', ' ', cleaned_text)
-    cleaned_text = re.sub('\s[a-z]{1,2}\s', ' ', cleaned_text)
-    # removing extract space between the words
-    cleaned_text = re.sub('\s+', ' ', cleaned_text)
-
     cleaned_text = cleaned_text.lower()
 
     history = find_features_row(cleaned_text, titles, search_words['history'])
@@ -154,7 +174,9 @@ def process_row(comment_html_o):
                                         search_words['diagnostic_test'])  # NB 3/17 - redefined categories
     treatment = find_features_row(cleaned_text, titles, search_words['treatment'])
 
-    return (cleaned_text, history, physical_exam, diagnoses, diagnostic_test, treatment)
+    cleaned_text = data_cleaning(cleaned_text)
+
+    return cleaned_text, history, physical_exam, diagnoses, diagnostic_test, treatment
 
 
 if __name__ == '__main__':
