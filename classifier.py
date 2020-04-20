@@ -346,4 +346,4 @@ if __name__ == "__main__":
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    main(output_dir, experiment=2)
+    main(output_dir, experiment=1)
