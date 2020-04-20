@@ -262,7 +262,7 @@ def get_features(x):
     return feature_names, x_features
 
 
-def main(output_dir, experiment='all'):
+def main(output_dir, experiment=1):
     assert experiment in [1, 2, 'all'], print('experiment should be either 1, 2 or "all"')
     if experiment == 1 or experiment == 'all':
         comments_train, y_train = load_train()
