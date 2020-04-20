@@ -173,7 +173,7 @@ def main(train_path, output_dir, label_dir):
 
     # Create label model
     label_model = LabelModel(cardinality=2, verbose=True)
-    label_model.fit(L_train=L_train, n_epochs=500, log_freq=100, seed=123)
+    label_model.fit(L_train=L_train, n_epochs=500, log_freq=100, seed=123, class_balance = [0.3, 0.7])
 
     # Evaluate the label model using labeled test set
     for metric in ['recall', 'precision', 'f1', 'accuracy']:

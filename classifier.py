@@ -29,6 +29,7 @@ import matplotlib.pyplot as plt
 import sklearn
 # from sklearn.inspection import permutation_importance
 from sklearn.utils import resample
+from sklearn.metrics import precision_recall_curve
 
 from labeler import read_human_labels
 
@@ -99,7 +100,7 @@ def base_model(X):
     return np.ones(X.shape[0])
 
 
-def feature_importance(model, model_name, X_test, y_test, feature_names, output_dir):
+def feature_importance(model, model_name, X_test, y_test, feature_names, output_dir, fold_counter=''):
     if model_name == 'RandomForestClassifier':
         #        result = permutation_importance(model, X_test.toarray(), y_test, n_repeats=10, random_state=42, n_jobs=2)
         #        sorted_idx = result.importances_mean.argsort()
@@ -138,7 +139,7 @@ def feature_importance(model, model_name, X_test, y_test, feature_names, output_
         fig.tight_layout()
         plt.show()
 
-    fig.savefig(os.path.join(output_dir, model_name + '_feat_imp.png'), dpi=300)
+    fig.savefig(os.path.join(output_dir, model_name + '_feat_imp' + fold_counter + '.png'), dpi=300)
 
 
 """
@@ -181,8 +182,23 @@ def get_score(model_pred, y, score_function):
 def print_CI(name, val, lower, upper):
     print("%-16s %.3f%% (%.3f%%, %.3f%%)" % (name + ":", val * 100, lower * 100, upper * 100))
 
+def print_results(y, pred, evaluate):
+    f1, f1_lower, f1_upper = get_score(y, pred, 'f1_score')
+    recall, recall_lower, recall_upper = get_score(y, pred, 'recall_score')
+    precision, precision_lower, precision_upper = get_score(y, pred, 'precision_score')
+    acc, acc_lower, acc_upper = get_score(y, pred, 'accuracy_score')
 
-def run_classifier(X_train, y_train, X_test, y_test, feature_names, output_dir):
+    print_CI(evaluate + ' f1', f1, f1_lower, f1_upper)
+    print_CI(evaluate + ' recall', recall, recall_lower, recall_upper)
+    print_CI(evaluate + ' precision', precision, precision_lower, precision_upper)
+    print_CI(evaluate + ' accuracy', acc, acc_lower, acc_upper)
+
+def run_classifier(X_train, y_train, X_test, y_test, feature_names, output_dir, fold_counter = ''):
+    model_y_pred = {}
+    
+    if fold_counter != '':
+        print("Fold " + fold_counter + "...")
+    
     for model_name, model in models.items():
         print("**" * 10, model_name, "**" * 10)
 
@@ -191,9 +207,13 @@ def run_classifier(X_train, y_train, X_test, y_test, feature_names, output_dir):
         final_model.fit(X_train, y_train)
 
         pred_train = final_model.predict(X_train)
+        pred_test_proba = final_model.predict_proba(X_test)[:, 1]
         pred_test = final_model.predict(X_test)
         pred_base = base_model(X_test)
-
+        
+        # Store predictions
+        model_y_pred[model_name] = pred_test_proba
+        
         # Summarize best model
         print('BEST ESTIMATOR')
         print(final_model.best_estimator_)
@@ -214,28 +234,21 @@ def run_classifier(X_train, y_train, X_test, y_test, feature_names, output_dir):
                 y = y_test
                 pred = pred_test
 
-            f1, f1_lower, f1_upper = get_score(y, pred, 'f1_score')
-            recall, recall_lower, recall_upper = get_score(y, pred, 'recall_score')
-            precision, precision_lower, precision_upper = get_score(y, pred, 'precision_score')
-            acc, acc_lower, acc_upper = get_score(y, pred, 'accuracy_score')
-
-            print_CI(evaluate + ' f1', f1, f1_lower, f1_upper)
-            print_CI(evaluate + ' recall', recall, recall_lower, recall_upper)
-            print_CI(evaluate + ' precision', precision, precision_lower, precision_upper)
-            print_CI(evaluate + ' accuracy', acc, acc_lower, acc_upper)
+            print_results(y, pred, evaluate)
 
         # Feature importance
-        feature_importance(final_model, model_name, X_test, y_test, feature_names, output_dir)
+        feature_importance(final_model, model_name, X_test, y_test, feature_names, output_dir, fold_counter=fold_counter)
 
         # PR curves
         avg_precision_test = average_precision_score(y_test, pred_test)
 
         disp = plot_precision_recall_curve(final_model, X_test, y_test)
         disp.ax_.set_title('{0} Precision-Recall curve: '
-                           'Avg. Pre.={1:0.2f}'.format(model_name, avg_precision_test), name=model_name)
-        disp.ax_.get_legend().remove()  # NB: remove legend and add space to plot title
-        disp.figure_.savefig(os.path.join(output_dir, model_name + '_PR.png'), dpi=300)
+                           'Avg. Pre.={1:0.3f}'.format(model_name, avg_precision_test), name=model_name)
+        disp.ax_.get_legend().remove()
+        disp.figure_.savefig(os.path.join(output_dir, model_name + '_PR' + fold_counter + '.png'), dpi=300)
 
+    return model_y_pred, y_test
 
 def get_features(x):
     custom_stopwords = list(text.ENGLISH_STOP_WORDS)
@@ -274,19 +287,57 @@ def main(output_dir, experiment='all'):
         df = df.query('_merge=="both"').drop('_merge', axis=1)
         X = df.Cleaned_Text.values
         y = df.human_label.values
-
         feature_names, X_tfidf = get_features(X)
-
-        kfold = StratifiedKFold(n_splits=5, random_state=random_state, shuffle=True)
+        
+        # Prepare for CV loop       
+        kfold = StratifiedKFold(n_splits=3, random_state=random_state, shuffle=True)
+        fold_num = 0
+        y_true = []
+        model_predictions = {}
+        for model_name in models.keys():
+                model_predictions[model_name] = []
+        
+        # CV
         for train_idx, test_idx in kfold.split(X_tfidf, y):
             X_train = X_tfidf[train_idx, :]
             X_test = X_tfidf[test_idx, :]
             y_train = y[train_idx]
             y_test = y[test_idx]
+            
+            # Run classifier
             print("Training classifier using Human labels ...")
-            run_classifier(X_train, y_train, X_test, y_test, feature_names, output_dir)
+            model_y_pred, y_test = run_classifier(X_train, y_train, X_test, y_test, feature_names, output_dir, fold_counter = str(fold_num))
+            
+            # Pool predictions
+            y_true.extend(list(y_test))
+            for model_name in models.keys():
+                model_predictions[model_name].extend(list(model_y_pred[model_name]))
+            
+            fold_num += 1
 
-    # TODO: Run CV experiment using human labels for training
+        # Results on pooled predictions
+        THRESHOLD = 0.5
+        for model_name in model_predictions.keys():
+            print("*** Model: " + model_name)
+            y_ones = np.ones(len(model_predictions[model_name]))
+            pred_proba = model_predictions[model_name]
+            pred = list((np.array(pred_proba) > THRESHOLD).astype(int))
+            
+            # Performance results
+            print_results(y_true, y_ones, evaluate="Base")
+            print_results(y_true, pred, evaluate="Test")
+            
+            # PR curve on pooled predictions
+            avg_precision_test = average_precision_score(y_true, pred)
+            precision, recall, thresh = precision_recall_curve(y_true, pred_proba)                
+            plt.figure()
+            plt.step(recall, precision, color='k', linestyle ='-', where='post')
+            plt.xlabel('Recall')
+            plt.ylabel('Precision')
+            plt.ylim([0.0, 1.05])
+            plt.xlim([0.0, 1.0])
+            plt.title(model_name + " PR pooled predictions: Avg. Pre.=%.3f" % (avg_precision_test,))
+            plt.savefig(os.path.join(output_dir, model_name + '_PR_combined.png'), dpi = 300)
 
 
 if __name__ == "__main__":
