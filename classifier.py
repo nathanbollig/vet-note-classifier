@@ -240,7 +240,9 @@ def run_classifier(X_train, y_train, X_test, y_test, feature_names, output_dir, 
         feature_importance(final_model, model_name, X_test, y_test, feature_names, output_dir, fold_counter=fold_counter)
 
         # PR curves
-        avg_precision_test = average_precision_score(y_test, pred_test)
+        # avg_precision_test = average_precision_score(y_test, pred_test_proba) # NB fixed to pred_test_proba 4-21
+        avg_precision_test, ap_lower, ap_upper = get_score(y, pred_test_proba, 'average_precision_score')
+        print_CI('test avg prec', avg_precision_test, ap_lower, ap_upper)
 
         disp = plot_precision_recall_curve(final_model, X_test, y_test)
         disp.ax_.set_title('{0} Precision-Recall curve: '
@@ -290,7 +292,7 @@ def main(output_dir, experiment=1):
         feature_names, X_tfidf = get_features(X)
         
         # Prepare for CV loop       
-        kfold = StratifiedKFold(n_splits=3, random_state=random_state, shuffle=True)
+        kfold = StratifiedKFold(n_splits=5, random_state=random_state, shuffle=True)
         fold_num = 0
         y_true = []
         model_predictions = {}
@@ -326,9 +328,11 @@ def main(output_dir, experiment=1):
             # Performance results
             print_results(y_true, y_ones, evaluate="Base")
             print_results(y_true, pred, evaluate="Test")
+            avg_precision_test, ap_lower, ap_upper = get_score(y_true, pred_proba, 'average_precision_score')
+            print_CI('test avg prec', avg_precision_test, ap_lower, ap_upper)
             
             # PR curve on pooled predictions
-            avg_precision_test = average_precision_score(y_true, pred)
+            # avg_precision_test = average_precision_score(y_true, pred_proba) # NB fixed to pred_proba 4-21
             precision, recall, thresh = precision_recall_curve(y_true, pred_proba)                
             plt.figure()
             plt.step(recall, precision, color='k', linestyle ='-', where='post')
