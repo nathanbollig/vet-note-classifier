@@ -88,7 +88,7 @@ def read_human_labels(label_dir):
            df = df[['record_number', 'human_label']]
            dataframes.append(df)
 
-    return pd.concat(dataframes).drop_duplicates(subset = 'record_number')
+    return pd.concat(dataframes, ignore_index = True).drop_duplicates(subset = 'record_number')
 
 
 """
